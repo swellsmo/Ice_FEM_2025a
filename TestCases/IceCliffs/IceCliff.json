@@ -205,7 +205,7 @@
         }
     },
     "Models":{
-        "Names":["PhaseField1","Thermal","Porosity","Boundary1","Boundary2b","Boundary3"],
+        "Names":["PhaseField1","Thermal","Porosity","Boundary1","Boundary2","Boundary3"],
         "PhaseField1":{
             "Name": "Fracture/CossPhaseField",
             "ElementGroup_u": "internal",
@@ -239,15 +239,6 @@
             "values": [0.0, 0.0]
         },
         "Boundary2":{
-            "Name": "BasalFriction",
-            "ElementGroup_u":"bottom",
-            "ElementGroup_phase":"bottom",
-            "friction": 1.0e4,
-            "k": 1.0e12,
-            "u0": 1.0e-4,
-            "Lumped": true
-        },
-        "Boundary2b":{
             "Name": "Constraints",
             "NodeGroup":"bottom",
             "dofs": ["ux", "uy"],

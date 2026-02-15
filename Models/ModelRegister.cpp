@@ -17,7 +17,6 @@ void RegisterModels(){
     Register_BasalFrictionModel();
     Register_AreaConstraintsModel();
     Register_GeneralSolidModel();
-    Register_LargeDeformationModel();
     Register_TimeDepConstraintsModel();
 
     //Eulerian reference frame

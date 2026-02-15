@@ -172,9 +172,51 @@ Additionally, we define a block with the solver parameters:
 \CodeSnipU{TestCases/TriAxialCompression/TriAxial.json}{76}{87}{TestCases/TriAxialCompression/TriAxial.json}
 Defining the maximum amount of Newton-Raphson iterations per staggered step, the amount of multi-pass iterations for the staggered solution scheme (1 for a single pass staggered scheme, 2 or more for a multi-pass staggered scheme), and the convergence criteria for the non-linear solver (displacement, force, and energy based thresholds). This also defines whether a line-search algorithm is used, and the limits for the line-search step size. Finally, the type of linear solver is defined, with "GMRES" combining a GMRES iterative solver with a schwarz preconditioner (solving the linear system on each core separately), and "MUMPS" and "PARDISO" using direct LU solver.
 
+\subsubsection{Initialisation settings}
+Optionally, an initial state can be prescribed for selected test cases:
+\CodeSnipU{TestCases/TriAxialCompression/TriAxial.json}{88}{96}{TestCases/TriAxialCompression/TriAxial.json}
+which defines the type of initialisation, the interior element group and material it applies to, and the geometric and thermal parameters used for the initial defect field.
 
-TO COMPLETE
+\subsubsection{Time integration settings}
+Time integration parameters are defined through:
+\CodeSnipU{TestCases/TriAxialCompression/TriAxial.json}{65}{70}{TestCases/TriAxialCompression/TriAxial.json}
+for selecting the time integration scheme used by the momentum equation (e.g. BDF2 or Newmark), together with the associated Newmark parameters when this scheme is selected.
 
+The simulation timeline and adaptive time stepping settings are then defined as:
+\CodeSnipU{TestCases/TriAxialCompression/TriAxial.json}{98}{108}{TestCases/TriAxialCompression/TriAxial.json}
+This defines piece-wise constant time step sizes (\textit{dtSteps}) over user-defined intervals (\textit{tSteps}), whether dynamic time-step reduction is active, which output quantity is monitored for refinement, the refinement scaling and lower bound, the start and end time of the analysis, and how often output is written.
+
+\subsubsection{Visualisation settings}
+For live visualisation during the run, plots are selected and configured through:
+\CodeSnipU{TestCases/TriAxialCompression/TriAxial.json}{109}{112}{TestCases/TriAxialCompression/TriAxial.json}
+where \textit{Plots} defines which visualisations are shown, and each named entry specifies the settings for a particular surface, contour, or XY plot. For example:
+\CodeSnipU{TestCases/TriAxialCompression/TriAxial.json}{159}{179}{TestCases/TriAxialCompression/TriAxial.json}
+which defines XY plots by selecting the x-axis quantity, one or more y-axis quantities, the update frequency, and optional axis limits.
+
+\subsubsection{Output settings}
+The output file settings are defined by:
+\CodeSnipU{TestCases/TriAxialCompression/TriAxial.json}{181}{189}{TestCases/TriAxialCompression/TriAxial.json}
+which controls whether the mesh is written once or every output step, the destination folder, and which element groups and fields are exported (both nodal and integration point quantities).
+
+\subsubsection{Model definitions}
+Finally, the active models are listed and configured through:
+\CodeSnipU{TestCases/TriAxialCompression/TriAxial.json}{190}{193}{TestCases/TriAxialCompression/TriAxial.json}
+The \textit{Names} list defines all the models being used, and is then followed by a model-specific block defining the domain the model is active on, and any related settings. The required settings will be defined within the next section. 
+
+\section{Physics Models}
+The code includes several physics models, which are activated through the input file. This section describes the main models implemented, and the required settings. For a more complete overview of the governing equations, please refer to the paper.
+
+\subsection{Cosserat phase field model}
+
+\subsection{Thermal model}
+
+\subsection{Variable porosity model}
+
+\subsection{Boundary constraints model}
+
+\subsection{Tri-Axial compression forcing model}
+
+\subsection{Weak external forcing model}
 
 
 
