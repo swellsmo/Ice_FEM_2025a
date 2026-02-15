@@ -31,7 +31,6 @@
                 "TRef": 273.15,
                 "TOffset": 273.15,
                 "QCreep": 150.0e3,
-                "_ft0": 0.2e6,
                 "ft0": 0.2e6,
                 "ftdeg":4.0e4,
                 "sydeg": 0.5e6
@@ -75,8 +74,6 @@
         "DofStep":  [0,   0,    0,      0,    0,    0,      1,      1,  1,    2]
     },
     "nonlinSolver":{
-        "BFGS": [false, false, false],
-        "BFGS_Reset": 20,
         "max_it": 40,
         "max_outer_it": 1,
         "convCrit": [1.0e-5, 1.0e10, 1.0e-5],

@@ -11,3 +11,13 @@ Makefile
 *.hdf5
 *.mat
 .vscode/
+Documentation/Doc.aux
+Documentation/Doc.bbl
+Documentation/Doc.blg
+Documentation/Doc.fdb_latexmk
+Documentation/Doc.fls
+Documentation/Doc.log
+Documentation/Doc.out
+Documentation/Doc.spl
+Documentation/Doc.synctex.gz
+Documentation/Doc.toc

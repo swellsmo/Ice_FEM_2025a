@@ -1,0 +1,192 @@
+\documentclass[3p]{elsarticle} %preprint/3p
+
+\usepackage{hyperref}
+
+\journal{   }
+\usepackage[T1]{fontenc}
+\usepackage{amsmath} %added for maths environments (equation and align)
+\usepackage{amssymb}
+\usepackage{upgreek}
+\usepackage{bm} %bold symbols by using \bm
+\usepackage{mathtools, nccmath} %added for \xrightleftharpoons
+\usepackage{stmaryrd} %math symbols
+\usepackage{subcaption} %allowing for subcaptions and subfigures
+\captionsetup[sub]{font=normalsize}%normalsize
+
+\usepackage{algorithm} %added for algorithm box
+\usepackage{algpseudocode}
+\biboptions{sort&compress}
+
+\usepackage[autostyle]{csquotes}
+\MakeOuterQuote{"}
+
+\bibliographystyle{elsarticle-num}
+
+% slightly altering rules for figure placement to prevent full-page figures
+\usepackage{placeins}
+\renewcommand{\floatpagefraction}{.90}
+\renewcommand{\topfraction}{.90}
+
+\usepackage[capitalise, nameinlink]{cleveref}
+
+\usepackage{todonotes} %added for todo notes
+\let\oldtodo\todo
+\renewcommand{\todo}[1]{\oldtodo[inline]{#1}}
+%\renewcommand{\todo}[1]{\oldtodo[color=white!40,inline]{#1}}
+\newcommand{\toask}[1]{\oldtodo[color=green!40, inline]{#1}}
+\newcommand{\wrn}[1]{\oldtodo[color=red!40, inline]{#1}}
+
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{lstautogobble}
+\usepackage[numbered]{matlab-prettifier}
+\lstdefinestyle{mystyle}{
+	numbers=left,
+	numberstyle=\footnotesize,
+	numbersep=8pt,
+	style=Matlab-editor,
+	tabsize=4,
+	basicstyle=\ttfamily\footnotesize,
+	numbersep=12pt,
+	frame=none,
+	autogobble=true
+}
+\newcommand{\CodeSnipU}[4]{\lstinputlisting[firstnumber=#2,firstline=#2,lastline=#3,style=mystyle,title={#4}]{../#1}}
+\newcommand{\CodeSnip}[3]{\lstinputlisting[firstnumber=#2,firstline=#2,lastline=#3,style=mystyle,title={#1}]{../#1}}
+
+\newcommand{\citeMe}{\href{https://doi.org/10.1016/j.electacta.2025.146203}{T Hageman, C Andrade, and E {Martinez-Pa{\~n}eda}. \textit{Corrosion of metal reinforcements within concrete and localisation of supporting reactions under natural conditions}. Acta Electrochemica} \citep{Hageman2025}}
+
+\begin{document}
+\pagenumbering{gobble}
+\begin{frontmatter}
+\title{IceFEM: A finite element code to simulate fracture and viscous/plastic deformation in ice.}
+
+\author{Tim Hageman \corref{mycorrespondingauthor}}
+\cortext[mycorrespondingauthor]{Corresponding author}
+\ead{tim.hageman@eng.ox.ac.uk}
+
+\address{Department of Engineering Science, University of Oxford, Oxford OX1 3PJ, UK}
+
+\begin{abstract}
+Documentation that accompanies the \textit{C++} code \href{https://github.com/T-Hageman/Ice_FEM_2025a}{IceFEM, available from \textcolor{blue}{here}}. This documentation explains how to compile the code, the usage of the implemented finite element framework, and highlight the main files.  The code allows the simulation of the detailed failure behaviour of ice, considering brittle fractures through the phase-field model, capturing shear bands through von Mises plasticity, and capturing creep through Glens law. Several example files are also included, demonstrating how to set up the simulation of a tri-axial compression sample, and of an ice-cliff failure study. If using (part of) this code, please cite \citeMe{}.  
+\end{abstract}
+
+\begin{keyword}
+Glaciology, Finite elements, Phase-field fracture, Plasticity, Ice mechanics
+\end{keyword}
+
+\end{frontmatter}
+
+% \begin{figure}
+% 	\centering
+% 	\includegraphics[width=10cm]{Fig1.eps}
+% 	\caption{Overview of the system simulated using the presented C++ code}
+% \end{figure}
+
+\newpage
+\tableofcontents
+
+\newpage
+\pagenumbering{arabic}
+\section{Introduction}
+
+
+
+
+\subsection{Installation}
+
+\subsubsection{Required external libraries}
+The simulation code has been developed to work directly in ubuntu, or within windows using WSL \citep{mattwojo}. A script is included which installs all required libraries, \textit{Install\_ICEFEM.sh}. While it can be directly run to install and compile all libraries at once, it is strongly recommended that the contents is run line-by-line by copying it into the terminal. This allows for easier debugging in case of errors. The following libraries are required:
+
+\noindent \textbf{Intel OneMKL} \citep{oneMKL} is used for its linear matrix solvers (and used by PETSc).\\
+\textbf{Eigen} \citep{eigen} is used for small matrix and vector mutliplications.\\
+\textbf{RapidJSON} \citep{rapidjson} is used for reading the input files.\\
+\textbf{VTK} \citep{VTK} is used for visualisation during simulations.\\
+\textbf{Highfive} \citep{HighFive} is used to write output files in the HDF5 format.\\
+\textbf{PETSc} \citep{PETSc} is used for its implementation of parrallel (MPI) matrices and vectors (and their associated solvers).
+
+Most of the above libraries are easy to install. However, for PETSc care needs to be taken to enable support for C++, link to the Intel MKL library, and enable support for HDF5. This is enabled through the command:
+\CodeSnipU{Install_ICEFEM.sh}{78}{79}{Install\_ICEFEM.sh}
+
+In addition to the environmental variables set by OneMKL and PETSc (\$PETSC\_DIR, \$ PETSC\_ARCH, \$MKLROOT), an additional environmental variable is used in the cmake files to locate the other libraries, \$LIBRARY\_DIR, which should point to the parent folder that contains the eigen, rapidjson, and Highfive folders. 
+
+\subsubsection{Compiling}
+The code makes uses of cmake to create appropriate makefiles. To compile the code, first run cmake using \textit{cmake .} from the base directory, after which the code itself can be compiled using \textit{make} (or \textit{make -j 8} to compile in parrallel). 
+
+
+\subsection{Basic usage}
+\label{sec:usage}
+Once compiled, the code can be run using \textit{./IceCode <inputfile>} to run on a single core, or \textit{mpirun -n <number of cores> ./IceCode <inputfile>} to run in parallel. Example input files are included within the folder \textit{TestCases}. Running the code using the example file will print the progress of the simulation to the terminal, and open several plots showing the state of the system. The code will also save the results to a file, which can be visualised using the \textit{PlotData.m} matlab script available in the test cases' folder. 
+
+\begin{figure}
+	\centering
+	%\includegraphics[width=14cm]{Screenshot.png}
+	\missingfigure{Example of windows that open}
+	\caption{\todo{caption}}
+	\label{fig:Results}
+\end{figure}
+
+\subsection{Input Files}
+Example input files are provided in the folder \textit{TestCases}, which also includes the required scripts for mesh generation. The input files are in JSON format, containing the following sections:
+
+\subsubsection{General settings}
+Here, the general options, such as whether backup files are generated, and the amount of information printed during simulations are defined:
+\CodeSnipU{TestCases/TriAxialCompression/TriAxial.json}{2}{10}{TestCases/TriAxialCompression/TriAxial.json} 
+with \textit{InfoLevel} defining whtehr just simulation progress is printed(1), information within each time step is printed (2), or detailed information about matrix assembly steps are also included (3).
+
+\subsubsection{Mesh settings}
+Mesh generation is done through external scripts, with the path to the mesh file provided in the input file as:
+\CodeSnipU{TestCases/TriAxialCompression/TriAxial.json}{11}{15}{TestCases/TriAxialCompression/TriAxial.json} 
+This also defines the dimension of the problem (2D or 3D), and the number of integration points used per dimension (e.g. 2 for 2x2 integration points in 2D, and 2 for 2x2x2 integration points in 3D). Note that the mesh generation also pre-calculates the distribution of the elements across the cores, used for parrallelisation, and hence the meshes are specific to the number of cores used.
+
+\subsubsection{Material settings}
+Next, material settings are defined based on the physics they are used within. Starting with the phase-field settings:
+\CodeSnipU{TestCases/TriAxialCompression/TriAxial.json}{16}{27}{TestCases/TriAxialCompression/TriAxial.json} 
+In order of occurance defining the damage functions used for the elastic energy ("Quadratic" or "Cubic"), the degradation functions used for density and gravity (same as for the elastic energy, or "Step2", "Step5", "Step9", or "None"), the degradation function used to define the viscous and plastic driving forces, whether the same phase-field split used for the elastic energy within the phase-field equation is consistently used for the momentum balance as well, the phase-field distribution used ("Linear", "Quadratic", "HO\_Linear", or "HO\_Quadratic"), and the residual stiffness once the material is fully damaged (i.e. the stiffness of the material once the phase-field variable is zero).
+
+Temperature dependent properties are defined as:
+\CodeSnipU{TestCases/TriAxialCompression/TriAxial.json}{28}{37}{TestCases/TriAxialCompression/TriAxial.json} 
+which defines the reference temperature at which the properties are defined, the energy related to viscous creep, the tensile strength at the reference temperature and how much this changes with temperature, and how much the yield strength changes with temperature. 
+
+Next, the mechanical properties are defined as:
+\CodeSnipU{TestCases/TriAxialCompression/TriAxial.json}{38}{53}{TestCases/TriAxialCompression/TriAxial.json} 
+which defines:
+\begin{itemize}
+	\item The rheology used for the material, allowing for the following options: "LinearElastic" (only elastic deformations), "ViscoElastic" (elastic and viscous deformations), "ViscoElasticExpl" (elastic and viscous deformations, with an explicit time integration scheme for the viscous creep), "DamViscoElastic" (elastic and viscous deformations, with damage affecting the viscous driving force), "DamViscoElasticExpl" (elastic and viscous deformations, with damage affecting the viscous driving force, and an explicit time integration scheme), "ViscoElasticPlastic" (elastic, viscous, and plastic deformations), and "DamViscoElasticPlastic" (elastic, viscous, and plastic deformations, with damage affecting the viscous driving force).
+	\item The density, Young's modulus and Poisson's ratio of the solid material.
+	\item The Cosserat shear modulus and length scale.
+	\item Damping coefficient used for the additional damping.
+	\item Glen's law creep coefficient, exponent, and an optional limit beyond which no more creep occurs (for stability).
+	\item The yield strength, and hardening parameters, and viscous regularization used within the Von Mises plasticity model.
+\end{itemize}
+
+The fracture-specific properties:
+\CodeSnipU{TestCases/TriAxialCompression/TriAxial.json}{54}{59}{TestCases/TriAxialCompression/TriAxial.json}
+defining the specific phase-field energy split used (using "specStress" for the results used in the paper), phase field legnth scale, fracture energy release rate, and a viscous regularisation parameter. Finally, defining the thermal properties:
+\CodeSnipU{TestCases/TriAxialCompression/TriAxial.json}{60}{63}{TestCases/TriAxialCompression/TriAxial.json}
+
+\subsubsection{Solver settings}
+For the linear and non-linear solver, we define the degrees of freedom that require solving for, and the staggered solver step they are solved within:
+\CodeSnipU{TestCases/TriAxialCompression/TriAxial.json}{72}{75}{TestCases/TriAxialCompression/TriAxial.json} 
+Additionally, we define a block with the solver parameters:
+\CodeSnipU{TestCases/TriAxialCompression/TriAxial.json}{76}{87}{TestCases/TriAxialCompression/TriAxial.json}
+Defining the maximum amount of Newton-Raphson iterations per staggered step, the amount of multi-pass iterations for the staggered solution scheme (1 for a single pass staggered scheme, 2 or more for a multi-pass staggered scheme), and the convergence criteria for the non-linear solver (displacement, force, and energy based thresholds). This also defines whether a line-search algorithm is used, and the limits for the line-search step size. Finally, the type of linear solver is defined, with "GMRES" combining a GMRES iterative solver with a schwarz preconditioner (solving the linear system on each core separately), and "MUMPS" and "PARDISO" using direct LU solver.
+
+
+TO COMPLETE
+
+
+
+
+
+
+
+
+
+
+\FloatBarrier
+\section{References}
+\renewcommand{\bibsection}{}
+\bibliography{references}
+
+\end{document}
