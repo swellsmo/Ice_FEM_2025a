@@ -1,6 +1,4 @@
-# IceFEM: A finite element code to simulate fracture and viscous/plastic deformation in ice
-
-<img src="Physics/Visualisation/Icon.png" width="150" height="150">
+# <img src="Physics/Visualisation/Icon.png" width="150" height="150" align="left"> IceFEM: A finite element code to simulate fracture and viscous/plastic deformation in ice
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -127,10 +125,19 @@ After building, the executable `IceCode` will be in the build directory. Run a s
 
 Several test cases are provided in the `TestCases/` directory:
 
-**Triaxial Compression Test**:
+**2D Triaxial Compression Test**:
+```bash
+./IceCode ./TestCases/TriAxialCompression/TriAxial2D.json
+```
+
+![Example Simulation](Documentation/Tri2D.png)
+
+**3D Triaxial Compression Test**:
 ```bash
 ./IceCode ./TestCases/TriAxialCompression/TriAxial.json
 ```
+
+![Example Simulation](Documentation/Tri.png)
 
 **Ice Cliff Collapse Simulation**:
 ```bash
