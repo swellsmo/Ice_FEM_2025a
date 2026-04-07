@@ -59,6 +59,7 @@ The code is particularly suited for studying ice cliff collapse, crevasse format
 - **Eigen3**: Linear algebra library
 - **RapidJSON**: JSON parsing library
 - **HighFive**: C++ HDF5 wrapper
+- **IgaFEM**: MATLAB library for generating IGA meshes (https://sourceforge.net/projects/cmcodes/)
 
 ### Quick Installation (Linux)
 
