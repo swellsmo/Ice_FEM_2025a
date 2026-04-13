@@ -2,7 +2,7 @@
 warning('off','MATLAB:imagesci:hdf5dataset:datatypeOutOfRange')
 
 close all
-addpath(genpath('../../../../../Libraries/igafem'))
+addpath(genpath('/usr/lib/igafem'))
 clearvars
 clc
 	delete(gcp('nocreate'))
