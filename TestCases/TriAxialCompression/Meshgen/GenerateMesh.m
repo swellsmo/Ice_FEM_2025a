@@ -2,8 +2,8 @@ close all
 clear
 clc
 
-addpath(genpath('Z:\Libraries\igafem'))
-addpath(genpath('Z:\Libraries\meshpart-master'))
+addpath(genpath('/usr/lib/igafem'))
+%addpath(genpath('Z:\Libraries\meshpart-master'))
 
 tic
 
