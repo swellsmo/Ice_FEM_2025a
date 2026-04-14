@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Note: This repository serves to preserve the version of code related to the publication: 
+Note: This repository is modified from the code for the following paper: 
 > T. Hageman, *Phase-field fracture modelling of ice: From triaxial tests to ice-cliff collapse*, Computer Methods in Applied Mechanics and Engineering, 2026. https://doi.org/10.1016/j.cma.2026.118857
 
 
@@ -32,8 +32,7 @@ The code is particularly suited for studying ice cliff collapse, crevasse format
 
 - [Installation](#installation)
   - [Prerequisites](#prerequisites)
-  - [Quick Installation (Linux)](#quick-installation-linux)
-  - [Manual Installation](#manual-installation)
+  - [Dockerfile](#dockerfile)
 - [Usage](#usage)
   - [Basic Example](#basic-example)
   - [Running Test Cases](#running-test-cases)
@@ -60,61 +59,30 @@ The code is particularly suited for studying ice cliff collapse, crevasse format
 - **RapidJSON**: JSON parsing library
 - **HighFive**: C++ HDF5 wrapper
 - **IgaFEM**: MATLAB library for generating IGA meshes (https://sourceforge.net/projects/cmcodes/)
+- **MATLAB**: Dependencies I have found so far
+  - Image Processing Toolbox
+  - Parallel Computing Toolbox
 
-### Quick Installation (Linux)
+### Using IceFEM with Docker
 
-An automated installation script is provided for Ubuntu/Debian systems:
+If you would like to run IceFEM in a Docker container, there are two Dockerfiles in this repository (created with substantial help from Justin Linick). The first Dockerfile builds a "slim" base image with all the dependencies of IceFEM installed, and the other Dockerfile adds MATLAB on top of the IceFEM image for mesh generation purposes. Once the meshes are generated, you should be able to just use the base image (I think. Heavy caveat on "I think"). Fair warning, these images are quite large due to all the dependencies installed, and take a long time to build.
 
-```bash
-# Clone the repository
-git clone https://github.com/T-Hageman/Ice_FEM_2025a.git
-cd Ice_FEM_2025a
+Unfortunately MATLAB requires licensing to use. This requires an extra step when setting up the icefem:matlab image. First, run a container using the following docker run command:
 
-# Run the installation script (installs all dependencies)
-chmod +x Install_ICEFEM.sh
-./Install_ICEFEM.sh
-
-# Build the project
-cmake .
-make -j$(nproc)
-
-# Create a folder for outputs
-mkdir Results
+```
+docker run --rm -it <image_name> matlab -licmode onlinelicensing
 ```
 
-The installation script will:
-1. Install required system packages (compilers, CMake, etc.)
-2. Download and compile PETSc with optimized settings
-3. Install Eigen3, HDF5, HighFive, and RapidJSON
-4. Configure environment variables in `~/.bashrc`
+This will then prompt you to sign in to your MATLAB account. Once you have successfully signed in, run the following docker commit command to save the changes to a new image:
 
-### Manual Installation
+```
+docker commit <container_id> <new_image_name>
+```
 
-If you prefer to install dependencies manually or are using a different operating system:
-
-1. **Install system packages**:
-   ```bash
-   sudo apt-get update
-   sudo apt-get install build-essential cmake gfortran libopenmpi-dev
-   ```
-
-2. **Install PETSc**:
-   Follow the [PETSc installation guide](https://petsc.org/release/install/)
-
-3. **Set environment variables**:
-   ```bash
-   export PETSC_DIR=/path/to/petsc
-   export PETSC_ARCH=arch-linux-c-opt
-   export LIBRARY_DIR=/path/to/libraries
-   ```
-
-4. **Install other dependencies** (Eigen3, HDF5, VTK, etc.) in `$LIBRARY_DIR`
-
-5. **Build IceFEM**:
-   ```bash
-   cmake .
-   make -j$(nproc)
-   ```
+This will now allow you to access the container without needing to log in every time. 
+**NOTE 1**: In order to run the TestCases, you will need to confirm the path to IgaFEM in the mesh generations files is correct for your install. Assuming you're using the Dockerfile, I don't think you'll need to change the path? But just something to be aware of. My lack of coding skills mean I have no clue how to not have the path be anything other than hard coded 😬
+**NOTE 2**: You might need to add the flag `--platform linux/amd64` in the run command. I also lack the coding skills to figure out why
+**NOTE 3**: If you need to install any additional MATLAB toolboxes, add the name of the toolbox from the mpm_input_r2024a.txt file to the ADDITIONAL_PRODUCTS arg in the MATLAB Dockerfile
 
 ## Usage
 
@@ -128,7 +96,7 @@ After building, the executable `IceCode` will be in the build directory. Run a s
 
 ### Running Test Cases
 
-Several test cases are provided in the `TestCases/` directory:
+Several test cases are provided in the `TestCases/` directory. Before running test cases, you must generate the mesh for the test case using the generate_tmesh or GenerateMesh files available in the MeshGen folders of each test case.
 
 **2D Triaxial Compression Test**:
 ```bash
@@ -220,19 +188,19 @@ For detailed information about the implementation details, and advanced usage, p
 If you use IceFEM in your research or work, please cite the following paper:
 
 ```bibtex
-@article{Hageman2026,
-  title={Phase-field fracture modelling of ice: From triaxial tests to ice-cliff collapse},
-  author={Hageman, T.},
-  journal={Computer Methods in Applied Mechanics and Engineering},
-  year={2026},
-  publisher={Elsevier},
-  doi={},
-  note={In press}
-}
+@article{Hageman_2026,
+ title={Phase-field fracture modelling of ice: From triaxial tests to ice-cliff collapse},
+ volume={454},
+ url={http://dx.doi.org/10.1016/j.cma.2026.118857},
+ DOI={10.1016/j.cma.2026.118857},
+ journal={Computer Methods in Applied Mechanics and Engineering},
+ publisher={Elsevier BV},
+ author={Hageman, Tim},
+ year={2026},
+ month=june,
+ pages={118857},
+ language={en} }
 ```
-
-> T. Hageman, *Phase-field fracture modelling of ice: From triaxial tests to ice-cliff collapse*, Computer Methods in Applied Mechanics and Engineering, 2026. https://doi.org/
-
 ---
 
 **Note**: This code is provided for research purposes, and is provided as-is. While care has been taken to verify the simulation results, the author is not responsible for any unintended errors in the code. For detailed theoretical background and validation, please consult the associated publication.
