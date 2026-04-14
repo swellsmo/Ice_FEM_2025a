@@ -80,8 +80,11 @@ docker commit <container_id> <new_image_name>
 ```
 
 This will now allow you to access the container without needing to log in every time. 
+
 **NOTE 1**: In order to run the TestCases, you will need to confirm the path to IgaFEM in the mesh generations files is correct for your install. Assuming you're using the Dockerfile, I don't think you'll need to change the path? But just something to be aware of. My lack of coding skills mean I have no clue how to not have the path be anything other than hard coded 😬
+
 **NOTE 2**: You might need to add the flag `--platform linux/amd64` in the run command. I also lack the coding skills to figure out why
+
 **NOTE 3**: If you need to install any additional MATLAB toolboxes, add the name of the toolbox from the mpm_input_r2024a.txt file to the ADDITIONAL_PRODUCTS arg in the MATLAB Dockerfile
 
 ## Usage
